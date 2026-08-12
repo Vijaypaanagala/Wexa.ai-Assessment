@@ -1,0 +1,27 @@
+[project]
+name = "cognodb-benchmark"
+version = "0.1.0"
+description = "Fair, reproducible graph database cloud benchmark: CognoDB vs peers"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "neo4j>=5.26.0,<6",
+    "python-dotenv>=1.0.1,<2",
+    "httpx>=0.27.0,<1",
+    "redis>=5.0.0,<6",
+    "matplotlib>=3.8.0,<4",
+    "numpy>=1.26.0,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0,<9",
+    "ruff>=0.6.0,<1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

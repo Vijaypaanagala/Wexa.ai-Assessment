@@ -1,0 +1,44 @@
+# Secrets — never commit connection details
+.env
+.env.local
+*.pem
+credentials*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Raw downloads (prepared subsample may be committed under data/prepared/)
+data/raw/
+*.gz
+*.tar
+*.zip
+!data/prepared/.gitkeep
+
+# Local run artifacts (committed sample results live under results/sample/)
+results/runs/*
+!results/runs/.gitkeep
+charts/out/
+
+# Docker volumes
+.docker-data/
