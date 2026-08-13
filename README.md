@@ -2,7 +2,7 @@
 
 Fair, reproducible comparison of **CognoDB Cloud** against peer graph databases on the **same dataset**, **same logical workloads**, and **equivalent resource limits**.
 
-> Status: **Phase 1 — project skeleton & methodology**. Metrics tables below are templates; numbers land after Phases 5–7.
+> Status: **Phase 2 complete** — SNAP soc-Pokec subsample ready. Metrics tables remain templates until Phases 5–7.
 
 This repository is a take-home-style engineering benchmark: **methodology and honesty over declaring a winner**.
 
@@ -43,17 +43,27 @@ CognoDB free tier is intentionally small. Every peer is sized to that budget (or
 
 ---
 
-## Dataset (Phase 2)
+## Dataset (Phase 2) — complete
 
-| Field | Plan |
-|-------|------|
-| Source | [SNAP soc-Pokec](https://snap.stanford.edu/data/soc-Pokec.html) subsample |
-| Target size | ≥ **100,000** relationships (aim ~**250,000**); nodes accordingly |
-| Seed | `42` (fixed) |
+| Field | Value |
+|-------|-------|
+| Source | [SNAP soc-Pokec](https://snap.stanford.edu/data/soc-Pokec.html) (`soc-pokec-relationships.txt.gz`) |
+| Full SNAP graph | 1,632,803 nodes · 30,622,564 directed edges |
+| Subsample method | Vitter Algorithm R reservoir sample; then sort by `(start_id, end_id)` |
+| Seed | **42** |
+| **Nodes** | **350,480** |
+| **Relationships** | **250,000** |
 | Schema | `(:Person {id})-[:FOLLOWS]->(:Person)` |
-| Fit | Sized for the **smallest** free tier (Aura caps + 1 GB disk) |
+| Raw SHA-256 | `1a23e0ec8a4e497752125f6b3f01696fea7fcdb696fa61d1e822faf4d0d69b14` |
+| nodes.csv SHA-256 | `2c4ca0a8350f1e8c5bcf1a99110483c34b701d5cb9ca5e5e665bd4897fe85f93` |
+| relationships.csv SHA-256 | `562654a66d335eacefdb65eb0911cc0919a03091daf0e300b20f0e8ab0d4af45` |
+| Manifest | [`data/prepared/manifest.json`](data/prepared/manifest.json) |
 
-Exact node/relationship counts, checksum, and load method per platform will be filled after `data/prepare_dataset.py` ships.
+```powershell
+py -3 data\prepare_dataset.py --seed 42 --target-relationships 250000
+```
+
+See [`data/README.md`](data/README.md) for citation and reproduce notes.
 
 ---
 
@@ -187,7 +197,7 @@ docker compose up -d
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
 | 1 | Skeleton, fairness docs, adapter stubs, dry-run CLI | **Done** |
-| 2 | Seeded Pokec subsample + manifest | Next |
+| 2 | Seeded Pokec subsample + manifest | **Done** |
 | 3 | Harness: warm-up, iterations, mixed concurrency | Pending |
 | 4 | Live adapters + connectivity smoke tests | Pending |
 | 5 | Loaders + ingest metrics | Pending |
