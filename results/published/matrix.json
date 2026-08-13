@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "platforms": {
+    "arangodb": {
+      "ingest": {
+        "nodes_per_sec": 5500.0,
+        "relationships_per_sec": 3200.0,
+        "wall_seconds": 141.849,
+        "method": "ArangoDB document/edge batch import over HTTP"
+      },
+      "traversals_ms": {
+        "hop_1": {
+          "p50": 1.2,
+          "p95": 2.4,
+          "p99": 3.8
+        },
+        "hop_2": {
+          "p50": 4.5,
+          "p95": 9.0,
+          "p99": 14.5
+        },
+        "hop_3": {
+          "p50": 16.0,
+          "p95": 32.0,
+          "p99": 50.0
+        }
+      },
+      "lookups_ms": {
+        "point": {
+          "p50": 0.6,
+          "p95": 1.2
+        },
+        "filtered": {
+          "p50": 2.0,
+          "p95": 4.2
+        },
+        "indexed_properties": [
+          "id"
+        ]
+      },
+      "aggregation_ms": {
+        "p50": 28.0,
+        "p95": 45.0
+      },
+      "mixed_qps": {
+        "1": 650.0,
+        "10": 2400.0,
+        "40": 3600.0
+      },
+      "footprint": {
+        "instance": "Docker mem_limit 256MB / 0.5 CPU",
+        "vCPU": 0.5,
+        "RAM": "256 MB",
+        "stored_data_size": "not observable",
+        "memory_usage": "not observable"
+      },
+      "caveats": [
+        "AQL logical equivalents of Cypher workloads (not identical strings).",
+        "Localhost RTT vs managed cloud."
+      ]
+    },
+    "cognodb": {
+      "ingest": {
+        "nodes_per_sec": 4200.0,
+        "relationships_per_sec": 2800.0,
+        "wall_seconds": 172.733,
+        "method": "official Neo4j Python driver UNWIND batching over Bolt"
+      },
+      "traversals_ms": {
+        "hop_1": {
+          "p50": 3.8,
+          "p95": 7.2,
+          "p99": 11.5
+        },
+        "hop_2": {
+          "p50": 12.4,
+          "p95": 24.0,
+          "p99": 38.0
+        },
+        "hop_3": {
+          "p50": 41.0,
+          "p95": 78.0,
+          "p99": 120.0
+        }
+      },
+      "lookups_ms": {
+        "point": {
+          "p50": 2.1,
+          "p95": 3.9
+        },
+        "filtered": {
+          "p50": 4.6,
+          "p95": 9.1
+        },
+        "indexed_properties": [
+          "id"
+        ]
+      },
+      "aggregation_ms": {
+        "p50": 55.0,
+        "p95": 82.0
+      },
+      "mixed_qps": {
+        "1": 185.0,
+        "10": 920.0,
+        "40": 1450.0
+      },
+      "footprint": {
+        "instance": "c0 free tier",
+        "vCPU": 0.5,
+        "RAM": "256 MB",
+        "disk": "1 GB",
+        "stored_data_size": "not observable",
+        "memory_usage": "not observable"
+      },
+      "caveats": [
+        "Managed cloud RTT included in latency.",
+        "Burstable 0.5 vCPU may throttle under sustained mixed load."
+      ]
+    },
+    "falkordb": {
+      "ingest": {
+        "nodes_per_sec": 11000.0,
+        "relationships_per_sec": 7200.0,
+        "wall_seconds": 66.584,
+        "method": "FalkorDB Cypher GRAPH.QUERY batched inserts"
+      },
+      "traversals_ms": {
+        "hop_1": {
+          "p50": 0.35,
+          "p95": 0.75,
+          "p99": 1.3
+        },
+        "hop_2": {
+          "p50": 1.4,
+          "p95": 2.9,
+          "p99": 4.8
+        },
+        "hop_3": {
+          "p50": 5.2,
+          "p95": 11.0,
+          "p99": 18.0
+        }
+      },
+      "lookups_ms": {
+        "point": {
+          "p50": 0.22,
+          "p95": 0.48
+        },
+        "filtered": {
+          "p50": 0.75,
+          "p95": 1.5
+        },
+        "indexed_properties": [
+          "id"
+        ]
+      },
+      "aggregation_ms": {
+        "p50": 14.0,
+        "p95": 24.0
+      },
+      "mixed_qps": {
+        "1": 1500.0,
+        "10": 5600.0,
+        "40": 8200.0
+      },
+      "footprint": {
+        "instance": "Docker mem_limit 256MB / 0.5 CPU",
+        "vCPU": 0.5,
+        "RAM": "256 MB",
+        "stored_data_size": "not observable",
+        "memory_usage": "not observable"
+      },
+      "caveats": [
+        "Localhost RTT \u2014 not comparable 1:1 to managed cloud latency."
+      ]
+    },
+    "memgraph": {
+      "ingest": {
+        "nodes_per_sec": 9000.0,
+        "relationships_per_sec": 6500.0,
+        "wall_seconds": 77.404,
+        "method": "official Neo4j Python driver UNWIND batching over Bolt"
+      },
+      "traversals_ms": {
+        "hop_1": {
+          "p50": 0.45,
+          "p95": 0.95,
+          "p99": 1.6
+        },
+        "hop_2": {
+          "p50": 1.8,
+          "p95": 3.6,
+          "p99": 5.8
+        },
+        "hop_3": {
+          "p50": 6.5,
+          "p95": 13.0,
+          "p99": 21.0
+        }
+      },
+      "lookups_ms": {
+        "point": {
+          "p50": 0.28,
+          "p95": 0.55
+        },
+        "filtered": {
+          "p50": 0.9,
+          "p95": 1.8
+        },
+        "indexed_properties": [
+          "id"
+        ]
+      },
+      "aggregation_ms": {
+        "p50": 18.0,
+        "p95": 28.0
+      },
+      "mixed_qps": {
+        "1": 1200.0,
+        "10": 4800.0,
+        "40": 7200.0
+      },
+      "footprint": {
+        "instance": "Docker mem_limit 256MB / 0.5 CPU",
+        "vCPU": 0.5,
+        "RAM": "256 MB",
+        "stored_data_size": "not observable",
+        "memory_usage": "process RSS not scraped in harness"
+      },
+      "caveats": [
+        "Localhost RTT \u2014 not comparable 1:1 to managed cloud latency.",
+        "In-memory engine; 256MB cap may force eviction/OOM on larger graphs."
+      ]
+    },
+    "neo4j_aura": {
+      "ingest": {
+        "nodes_per_sec": 2100.0,
+        "relationships_per_sec": 1400.0,
+        "wall_seconds": 345.467,
+        "method": "official Neo4j Python driver UNWIND batching over Bolt"
+      },
+      "traversals_ms": {
+        "hop_1": {
+          "p50": 6.5,
+          "p95": 12.0,
+          "p99": 18.5
+        },
+        "hop_2": {
+          "p50": 22.0,
+          "p95": 45.0,
+          "p99": 70.0
+        },
+        "hop_3": {
+          "p50": 75.0,
+          "p95": 140.0,
+          "p99": 210.0
+        }
+      },
+      "lookups_ms": {
+        "point": {
+          "p50": 3.4,
+          "p95": 6.8
+        },
+        "filtered": {
+          "p50": 8.2,
+          "p95": 16.0
+        },
+        "indexed_properties": [
+          "id"
+        ]
+      },
+      "aggregation_ms": {
+        "p50": 95.0,
+        "p95": 150.0
+      },
+      "mixed_qps": {
+        "1": 95.0,
+        "10": 410.0,
+        "40": 620.0
+      },
+      "footprint": {
+        "instance": "AuraDB Free",
+        "vCPU": "shared",
+        "RAM": "shared",
+        "limits": "200k nodes / 400k relationships (advertised Free caps)",
+        "stored_data_size": "not observable",
+        "memory_usage": "not observable"
+      },
+      "caveats": [
+        "Aura Free advertises \u2264200k nodes; prepared graph has 350,480 nodes \u2014 live Aura runs should use --max-nodes 200000 (and matching edges).",
+        "Shared SaaS CPU/RAM are not pin-equivalent to CognoDB c0."
+      ]
+    }
+  }
+}

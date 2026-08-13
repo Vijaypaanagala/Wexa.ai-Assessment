@@ -35,9 +35,10 @@ data/raw/
 *.zip
 !data/prepared/.gitkeep
 
-# Local run artifacts (committed sample results live under results/sample/)
+# Local live-run artifacts (committed published results live under results/published/)
 results/runs/*
 !results/runs/.gitkeep
+# Generated chart scratch; committed charts live directly under charts/*.png
 charts/out/
 
 # Docker volumes

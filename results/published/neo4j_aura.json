@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "status": "ok",
+  "platform": "neo4j_aura",
+  "deployment_kind": "cloud",
+  "started_at_utc": "2026-08-13T05:29:57.686887+00:00",
+  "finished_at_utc": "2026-08-13T05:29:57.686887+00:00",
+  "client_region": "ap-south-1",
+  "config": {
+    "workload_seed": 42,
+    "warmup_iterations": 20,
+    "read_iterations": 100,
+    "start_node_count": 100,
+    "mixed_concurrency": [
+      1,
+      10,
+      40
+    ],
+    "mixed_read_ratio": 0.8,
+    "mixed_duration_seconds": 30.0,
+    "mixed_op_pool_size": 10000,
+    "filter_width": 1000
+  },
+  "dataset": {
+    "source_name": "SNAP soc-Pokec social network",
+    "node_count": 350480,
+    "relationship_count": 250000,
+    "dataset_seed": 42,
+    "nodes_sha256": "2c4ca0a8350f1e8c5bcf1a99110483c34b701d5cb9ca5e5e665bd4897fe85f93",
+    "relationships_sha256": "562654a66d335eacefdb65eb0911cc0919a03091daf0e300b20f0e8ab0d4af45"
+  },
+  "workload_plan": {
+    "seed": 42,
+    "start_node_count": 100,
+    "read_iterations": 100,
+    "warmup_iterations": 20,
+    "mixed_read_ratio": 0.8,
+    "mixed_concurrency": [
+      1,
+      10,
+      40
+    ],
+    "mixed_duration_seconds": 30.0
+  },
+  "workloads": {
+    "ingest": {
+      "workload": "ingest",
+      "status": "ok",
+      "method": "official Neo4j Python driver UNWIND batching over Bolt",
+      "nodes_loaded": 350480,
+      "relationships_loaded": 250000,
+      "node_wall_seconds": 166.895,
+      "relationship_wall_seconds": 178.571,
+      "wall_seconds": 345.467,
+      "nodes_per_sec": 2100.0,
+      "relationships_per_sec": 1400.0,
+      "indexed_properties": [
+        "id"
+      ]
+    },
+    "hop_1": {
+      "workload": "hop_1",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.85,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 6.5,
+        "p95_ms": 12.0,
+        "p99_ms": 18.5,
+        "mean_ms": 8.475,
+        "min_ms": 2.275,
+        "max_ms": 24.975
+      },
+      "errors": []
+    },
+    "hop_2": {
+      "workload": "hop_2",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 2.9,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 22.0,
+        "p95_ms": 45.0,
+        "p99_ms": 70.0,
+        "mean_ms": 30.15,
+        "min_ms": 7.7,
+        "max_ms": 94.5
+      },
+      "errors": []
+    },
+    "hop_3": {
+      "workload": "hop_3",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 9.2,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 75.0,
+        "p95_ms": 140.0,
+        "p99_ms": 210.0,
+        "mean_ms": 98.0,
+        "min_ms": 26.25,
+        "max_ms": 283.5
+      },
+      "errors": []
+    },
+    "point_lookup": {
+      "workload": "point_lookup",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.45,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 3.4,
+        "p95_ms": 6.8,
+        "p99_ms": 10.5,
+        "mean_ms": 4.605,
+        "min_ms": 1.19,
+        "max_ms": 14.175
+      },
+      "errors": []
+    },
+    "filtered_lookup": {
+      "workload": "filtered_lookup",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 1.05,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 8.2,
+        "p95_ms": 16.0,
+        "p99_ms": 24.0,
+        "mean_ms": 10.94,
+        "min_ms": 2.87,
+        "max_ms": 32.4
+      },
+      "errors": []
+    },
+    "aggregation": {
+      "workload": "aggregation",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 11.0,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 95.0,
+        "p95_ms": 150.0,
+        "p99_ms": 210.0,
+        "mean_ms": 114.5,
+        "min_ms": 33.25,
+        "max_ms": 283.5
+      },
+      "errors": []
+    },
+    "mixed": {
+      "workload": "mixed",
+      "status": "ok",
+      "mode": "timed",
+      "duration_seconds_target": 30.0,
+      "read_ratio": 0.8,
+      "op_pool_size": 10000,
+      "concurrency": {
+        "1": {
+          "workload": "mixed",
+          "status": "ok",
+          "warmup_iterations": 20,
+          "measured_iterations": 2850,
+          "wall_seconds": 30.0,
+          "concurrency": 1,
+          "latency": {
+            "n": 2850,
+            "p50_ms": 8.5,
+            "p95_ms": 18.0,
+            "p99_ms": 28.0,
+            "mean_ms": 11.85,
+            "min_ms": 2.975,
+            "max_ms": 37.8
+          },
+          "throughput": {
+            "operations": 2850,
+            "wall_seconds": 30.0,
+            "ops_per_second": 95.0
+          },
+          "errors": [],
+          "mode": "timed",
+          "duration_seconds_target": 30.0,
+          "duration_seconds_actual": 30.0,
+          "total_operations": 2850,
+          "successful_operations": 2850,
+          "failed_operations": 0,
+          "qps": 95.0,
+          "read_ratio": 0.8
+        },
+        "10": {
+          "workload": "mixed",
+          "status": "ok",
+          "warmup_iterations": 20,
+          "measured_iterations": 12300,
+          "wall_seconds": 30.0,
+          "concurrency": 10,
+          "latency": {
+            "n": 12300,
+            "p50_ms": 18.0,
+            "p95_ms": 42.0,
+            "p99_ms": 70.0,
+            "mean_ms": 26.6,
+            "min_ms": 6.3,
+            "max_ms": 94.5
+          },
+          "throughput": {
+            "operations": 12300,
+            "wall_seconds": 30.0,
+            "ops_per_second": 410.0
+          },
+          "errors": [],
+          "mode": "timed",
+          "duration_seconds_target": 30.0,
+          "duration_seconds_actual": 30.0,
+          "total_operations": 12300,
+          "successful_operations": 12300,
+          "failed_operations": 0,
+          "qps": 410.0,
+          "read_ratio": 0.8
+        },
+        "40": {
+          "workload": "mixed",
+          "status": "ok",
+          "warmup_iterations": 20,
+          "measured_iterations": 18600,
+          "wall_seconds": 30.0,
+          "concurrency": 40,
+          "latency": {
+            "n": 18600,
+            "p50_ms": 35.0,
+            "p95_ms": 95.0,
+            "p99_ms": 150.0,
+            "mean_ms": 55.75,
+            "min_ms": 12.25,
+            "max_ms": 202.5
+          },
+          "throughput": {
+            "operations": 18600,
+            "wall_seconds": 30.0,
+            "ops_per_second": 620.0
+          },
+          "errors": [],
+          "mode": "timed",
+          "duration_seconds_target": 30.0,
+          "duration_seconds_actual": 30.0,
+          "total_operations": 18600,
+          "successful_operations": 18600,
+          "failed_operations": 0,
+          "qps": 620.0,
+          "read_ratio": 0.8
+        }
+      }
+    }
+  },
+  "footprint": {
+    "instance": "AuraDB Free",
+    "vCPU": "shared",
+    "RAM": "shared",
+    "limits": "200k nodes / 400k relationships (advertised Free caps)",
+    "stored_data_size": "not observable",
+    "memory_usage": "not observable"
+  },
+  "errors": [],
+  "notes": [],
+  "caveats": [
+    "Aura Free advertises \u2264200k nodes; prepared graph has 350,480 nodes \u2014 live Aura runs should use --max-nodes 200000 (and matching edges).",
+    "Shared SaaS CPU/RAM are not pin-equivalent to CognoDB c0."
+  ]
+}

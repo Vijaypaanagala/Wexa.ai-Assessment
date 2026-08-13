@@ -1,64 +1,43 @@
-"""CognoDB Cloud stub — Phase 4 will implement Bolt/Cypher via neo4j driver."""
+"""CognoDB Cloud — Bolt/Cypher via official neo4j driver."""
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from typing import Any
 
 from adapters.base import GraphAdapter
+from adapters.bolt_common import bolt_smoke_return_1, close_bolt_driver, open_bolt_driver
+from adapters.cypher_bolt import CypherBoltWorkloads
+from adapters.errors import AdapterConnectionError
 from harness.config import cognodb_config
 
 
-class CognoDBAdapter(GraphAdapter):
+class CognoDBAdapter(CypherBoltWorkloads, GraphAdapter):
     name = "cognodb"
+    index_dialect = "neo4j"
 
     def __init__(self) -> None:
         self.cfg = cognodb_config()
         self._driver = None
 
     def connect(self) -> None:
-        raise NotImplementedError("Phase 4: CognoDB Bolt adapter")
+        if self._driver is not None:
+            return
+        self._driver = open_bolt_driver(
+            platform=self.name,
+            uri=self.cfg.uri,
+            user=self.cfg.user or "cognodb",
+            password=self.cfg.password,
+            require_password=True,
+        )
 
     def close(self) -> None:
+        close_bolt_driver(self._driver)
         self._driver = None
 
-    def reset(self) -> None:
-        raise NotImplementedError
-
-    def create_schema(self) -> None:
-        raise NotImplementedError
-
-    def create_indexes(self) -> None:
-        raise NotImplementedError
-
-    def load_nodes(self, rows: Sequence[dict[str, Any]]) -> int:
-        raise NotImplementedError
-
-    def load_relationships(self, rows: Sequence[dict[str, Any]]) -> int:
-        raise NotImplementedError
-
-    def query_1hop(self, start_id: int) -> int:
-        raise NotImplementedError
-
-    def query_2hop(self, start_id: int) -> int:
-        raise NotImplementedError
-
-    def query_3hop(self, start_id: int) -> int:
-        raise NotImplementedError
-
-    def point_lookup(self, node_id: int) -> Any:
-        raise NotImplementedError
-
-    def filtered_lookup(self, lo: int, hi: int) -> int:
-        raise NotImplementedError
-
-    def aggregation(self) -> int:
-        raise NotImplementedError
-
-    def mixed_read(self, node_id: int) -> Any:
-        raise NotImplementedError
-
-    def mixed_write(self, src_id: int, dst_id: int) -> None:
-        raise NotImplementedError
+    def ping(self) -> bool:
+        if self._driver is None:
+            raise AdapterConnectionError(self.name, "Not connected; call connect() first")
+        return bolt_smoke_return_1(self._driver, platform=self.name)
 
     def footprint(self) -> dict[str, Any]:
         return {
@@ -66,6 +45,8 @@ class CognoDBAdapter(GraphAdapter):
             "vCPU": 0.5,
             "RAM": "256 MB",
             "disk": "1 GB",
+            "connections": 200,
+            "source": "https://cognodb.com/",
             "stored_data_size": "not observable",
             "memory_usage": "not observable",
         }

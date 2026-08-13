@@ -1,0 +1,22 @@
+[
+  {
+    "platform": "cognodb",
+    "path": "results/published/cognodb.json"
+  },
+  {
+    "platform": "neo4j_aura",
+    "path": "results/published/neo4j_aura.json"
+  },
+  {
+    "platform": "memgraph",
+    "path": "results/published/memgraph.json"
+  },
+  {
+    "platform": "falkordb",
+    "path": "results/published/falkordb.json"
+  },
+  {
+    "platform": "arangodb",
+    "path": "results/published/arangodb.json"
+  }
+]

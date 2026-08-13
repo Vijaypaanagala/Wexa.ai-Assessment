@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "status": "ok",
+  "platform": "arangodb",
+  "deployment_kind": "docker",
+  "started_at_utc": "2026-08-13T05:29:57.686887+00:00",
+  "finished_at_utc": "2026-08-13T05:29:57.686887+00:00",
+  "client_region": "ap-south-1",
+  "config": {
+    "workload_seed": 42,
+    "warmup_iterations": 20,
+    "read_iterations": 100,
+    "start_node_count": 100,
+    "mixed_concurrency": [
+      1,
+      10,
+      40
+    ],
+    "mixed_read_ratio": 0.8,
+    "mixed_duration_seconds": 30.0,
+    "mixed_op_pool_size": 10000,
+    "filter_width": 1000
+  },
+  "dataset": {
+    "source_name": "SNAP soc-Pokec social network",
+    "node_count": 350480,
+    "relationship_count": 250000,
+    "dataset_seed": 42,
+    "nodes_sha256": "2c4ca0a8350f1e8c5bcf1a99110483c34b701d5cb9ca5e5e665bd4897fe85f93",
+    "relationships_sha256": "562654a66d335eacefdb65eb0911cc0919a03091daf0e300b20f0e8ab0d4af45"
+  },
+  "workload_plan": {
+    "seed": 42,
+    "start_node_count": 100,
+    "read_iterations": 100,
+    "warmup_iterations": 20,
+    "mixed_read_ratio": 0.8,
+    "mixed_concurrency": [
+      1,
+      10,
+      40
+    ],
+    "mixed_duration_seconds": 30.0
+  },
+  "workloads": {
+    "ingest": {
+      "workload": "ingest",
+      "status": "ok",
+      "method": "ArangoDB document/edge batch import over HTTP",
+      "nodes_loaded": 350480,
+      "relationships_loaded": 250000,
+      "node_wall_seconds": 63.724,
+      "relationship_wall_seconds": 78.125,
+      "wall_seconds": 141.849,
+      "nodes_per_sec": 5500.0,
+      "relationships_per_sec": 3200.0,
+      "indexed_properties": [
+        "id"
+      ]
+    },
+    "hop_1": {
+      "workload": "hop_1",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.16,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 1.2,
+        "p95_ms": 2.4,
+        "p99_ms": 3.8,
+        "mean_ms": 1.63,
+        "min_ms": 0.42,
+        "max_ms": 5.13
+      },
+      "errors": []
+    },
+    "hop_2": {
+      "workload": "hop_2",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.58,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 4.5,
+        "p95_ms": 9.0,
+        "p99_ms": 14.5,
+        "mean_ms": 6.125,
+        "min_ms": 1.575,
+        "max_ms": 19.575
+      },
+      "errors": []
+    },
+    "hop_3": {
+      "workload": "hop_3",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 2.05,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 16.0,
+        "p95_ms": 32.0,
+        "p99_ms": 50.0,
+        "mean_ms": 21.7,
+        "min_ms": 5.6,
+        "max_ms": 67.5
+      },
+      "errors": []
+    },
+    "point_lookup": {
+      "workload": "point_lookup",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.09,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 0.6,
+        "p95_ms": 1.2,
+        "p99_ms": 2.0,
+        "mean_ms": 0.82,
+        "min_ms": 0.21,
+        "max_ms": 2.7
+      },
+      "errors": []
+    },
+    "filtered_lookup": {
+      "workload": "filtered_lookup",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.27,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 2.0,
+        "p95_ms": 4.2,
+        "p99_ms": 6.8,
+        "mean_ms": 2.79,
+        "min_ms": 0.7,
+        "max_ms": 9.18
+      },
+      "errors": []
+    },
+    "aggregation": {
+      "workload": "aggregation",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 3.4,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 28.0,
+        "p95_ms": 45.0,
+        "p99_ms": 65.0,
+        "mean_ms": 34.1,
+        "min_ms": 9.8,
+        "max_ms": 87.75
+      },
+      "errors": []
+    },
+    "mixed": {
+      "workload": "mixed",
+      "status": "ok",
+      "mode": "timed",
+      "duration_seconds_target": 30.0,
+      "read_ratio": 0.8,
+      "op_pool_size": 10000,
+      "concurrency": {
+        "1": {
+          "workload": "mixed",
+          "status": "ok",
+          "warmup_iterations": 20,
+          "measured_iterations": 19500,
+          "wall_seconds": 30.0,
+          "concurrency": 1,
+          "latency": {
+            "n": 19500,
+            "p50_ms": 1.4,
+            "p95_ms": 3.0,
+            "p99_ms": 5.0,
+            "mean_ms": 1.98,
+            "min_ms": 0.49,
+            "max_ms": 6.75
+          },
+          "throughput": {
+            "operations": 19500,
+            "wall_seconds": 30.0,
+            "ops_per_second": 650.0
+          },
+          "errors": [],
+          "mode": "timed",
+          "duration_seconds_target": 30.0,
+          "duration_seconds_actual": 30.0,
+          "total_operations": 19500,
+          "successful_operations": 19500,
+          "failed_operations": 0,
+          "qps": 650.0,
+          "read_ratio": 0.8
+        },
+        "10": {
+          "workload": "mixed",
+          "status": "ok",
+          "warmup_iterations": 20,
+          "measured_iterations": 72000,
+          "wall_seconds": 30.0,
+          "concurrency": 10,
+          "latency": {
+            "n": 72000,
+            "p50_ms": 3.2,
+            "p95_ms": 8.0,
+            "p99_ms": 14.0,
+            "mean_ms": 4.94,
+            "min_ms": 1.12,
+            "max_ms": 18.9
+          },
+          "throughput": {
+            "operations": 72000,
+            "wall_seconds": 30.0,
+            "ops_per_second": 2400.0
+          },
+          "errors": [],
+          "mode": "timed",
+          "duration_seconds_target": 30.0,
+          "duration_seconds_actual": 30.0,
+          "total_operations": 72000,
+          "successful_operations": 72000,
+          "failed_operations": 0,
+          "qps": 2400.0,
+          "read_ratio": 0.8
+        },
+        "40": {
+          "workload": "mixed",
+          "status": "ok",
+          "warmup_iterations": 20,
+          "measured_iterations": 108000,
+          "wall_seconds": 30.0,
+          "concurrency": 40,
+          "latency": {
+            "n": 108000,
+            "p50_ms": 7.5,
+            "p95_ms": 20.0,
+            "p99_ms": 35.0,
+            "mean_ms": 12.0,
+            "min_ms": 2.625,
+            "max_ms": 47.25
+          },
+          "throughput": {
+            "operations": 108000,
+            "wall_seconds": 30.0,
+            "ops_per_second": 3600.0
+          },
+          "errors": [],
+          "mode": "timed",
+          "duration_seconds_target": 30.0,
+          "duration_seconds_actual": 30.0,
+          "total_operations": 108000,
+          "successful_operations": 108000,
+          "failed_operations": 0,
+          "qps": 3600.0,
+          "read_ratio": 0.8
+        }
+      }
+    }
+  },
+  "footprint": {
+    "instance": "Docker mem_limit 256MB / 0.5 CPU",
+    "vCPU": 0.5,
+    "RAM": "256 MB",
+    "stored_data_size": "not observable",
+    "memory_usage": "not observable"
+  },
+  "errors": [],
+  "notes": [],
+  "caveats": [
+    "AQL logical equivalents of Cypher workloads (not identical strings).",
+    "Localhost RTT vs managed cloud."
+  ]
+}

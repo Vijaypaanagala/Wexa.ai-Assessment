@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Orchestrate load + bench across platforms (Phase 6/7)."""
+"""Orchestrate load + bench across platforms, or rebuild published artifacts."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -15,36 +16,65 @@ from adapters import ADAPTERS  # noqa: E402
 from harness.config import PLATFORMS  # noqa: E402
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Run full benchmark suite")
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Run full benchmark suite or rebuild artifacts")
+    parser.add_argument("--platform", choices=(*PLATFORMS, "all"), default="all")
+    parser.add_argument("--dry-run", action="store_true")
     parser.add_argument(
-        "--platform",
-        choices=(*PLATFORMS, "all"),
-        default="all",
-        help="Single platform or all",
+        "--publish-only",
+        action="store_true",
+        help="Rebuild results/published + charts without connecting to databases",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Phase 1 smoke: no DB I/O")
+    parser.add_argument("--skip-load", action="store_true")
+    parser.add_argument("--skip-bench", action="store_true")
     args = parser.parse_args()
 
-    targets = PLATFORMS if args.platform == "all" else (args.platform,)
-    summary = []
-    for name in targets:
-        adapter = ADAPTERS[name]()
-        entry = {
-            "platform": name,
-            "status": "dry_run" if args.dry_run else "not_implemented",
-            "load_method": adapter.load_method(),
-            "footprint": adapter.footprint(),
-        }
-        summary.append(entry)
-        print(json.dumps(entry, indent=2))
+    if args.publish_only:
+        subprocess.check_call([sys.executable, str(ROOT / "scripts" / "build_results.py")])
+        subprocess.check_call([sys.executable, str(ROOT / "scripts" / "aggregate_results.py")])
+        subprocess.check_call([sys.executable, str(ROOT / "scripts" / "plot_results.py")])
+        print("Published results + charts refreshed.")
+        return 0
 
-    out = ROOT / "results" / "runs" / "phase1_smoke.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
+    targets = PLATFORMS if args.platform == "all" else (args.platform,)
     if args.dry_run:
-        out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
-        print(f"Wrote {out}")
+        summary = []
+        for name in targets:
+            adapter = ADAPTERS[name]()
+            summary.append(
+                {
+                    "platform": name,
+                    "status": "dry_run",
+                    "load_method": adapter.load_method(),
+                    "footprint": adapter.footprint(),
+                }
+            )
+        print(json.dumps(summary, indent=2))
+        return 0
+
+    for name in targets:
+        if not args.skip_load:
+            rc = subprocess.call(
+                [sys.executable, str(ROOT / "scripts" / "load.py"), "--platform", name]
+            )
+            if rc != 0:
+                print(f"load failed for {name}", file=sys.stderr)
+                return rc
+        if not args.skip_bench:
+            rc = subprocess.call(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "bench.py"),
+                    "--platform",
+                    name,
+                    "--write-result",
+                ]
+            )
+            if rc != 0:
+                print(f"bench failed for {name}", file=sys.stderr)
+                return rc
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

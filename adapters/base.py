@@ -1,7 +1,7 @@
 """Common adapter interface for all graph platforms.
 
-Phase 3 defines the contract. Concrete CognoDB / Aura / Memgraph / FalkorDB /
-ArangoDB adapters are implemented in Phase 4 — stubs remain NotImplemented.
+Phase 3 defines the contract. Phase 4 implements connect()/close()/ping() for
+each platform. Loaders and query methods arrive in Phase 5/6.
 """
 
 from __future__ import annotations

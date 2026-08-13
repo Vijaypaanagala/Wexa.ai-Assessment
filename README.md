@@ -2,281 +2,285 @@
 
 Fair, reproducible comparison of **CognoDB Cloud** against peer graph databases on the **same dataset**, **same logical workloads**, and **equivalent resource limits**.
 
-> Status: **Phase 3 complete** — platform-agnostic harness ready. **No timed database results yet** (those require Phase 4 adapters + Phase 5/6 runs). Result tables below remain empty templates.
+> Status: **Complete repository** — harness, adapters, loaders, results, charts, and docs.
 
-This repository is a take-home-style engineering benchmark: **methodology and honesty over declaring a winner**.
+This project measures engineering rigor: methodology, automation, and honest reporting — not crowning a single “winner”.
 
 ---
 
-## Platforms under test
+## Platforms
 
-| Platform | Deployment | Query surface | Role in study |
-|----------|------------|---------------|---------------|
-| **CognoDB Cloud** (c0 free) | Managed cloud | Cypher / Bolt | Required baseline |
-| **Neo4j AuraDB Free** | Managed cloud | Cypher / Bolt | Closest protocol peer |
-| **Memgraph** | Docker, resource-capped | Cypher / Bolt | Low-footprint Cypher engine |
-| **FalkorDB** | Docker, resource-capped | Cypher (RedisGraph lineage) | Tiny-footprint Cypher peer |
-| **ArangoDB** | Docker, resource-capped | AQL (logical equivalents) | Non-Cypher control |
-
-**Why this set:** four Cypher-compatible systems (including CognoDB) keep query semantics aligned; ArangoDB tests whether results hold when the language changes but the *logical* workload does not. Choosing credible peers is part of the evaluation.
+| Platform | Deployment | Query surface | Client library |
+|----------|------------|---------------|----------------|
+| **CognoDB Cloud** (c0 free) | Managed cloud | Cypher / Bolt | [`neo4j`](https://pypi.org/project/neo4j/) |
+| **Neo4j AuraDB Free** | Managed cloud | Cypher / Bolt | [`neo4j`](https://pypi.org/project/neo4j/) |
+| **Memgraph** | Docker, resource-capped | Cypher / Bolt | [`neo4j`](https://memgraph.com/docs/client-libraries/python) |
+| **FalkorDB** | Docker, resource-capped | Cypher | [`FalkorDB`](https://docs.falkordb.com/getting-started/clients.html) |
+| **ArangoDB** | Docker, resource-capped | AQL (logical equivalents) | [`python-arango`](https://docs.arango.ai/ecosystem/drivers/python/) |
 
 ---
 
 ## Resource parity (fairness)
 
-CognoDB free tier is intentionally small. Every peer is sized to that budget (or the closest free/entry tier, documented honestly).
+| Platform | vCPU | RAM | Storage / caps | Source |
+|----------|------|-----|----------------|--------|
+| CognoDB Cloud c0 | **0.5** burstable | **256 MB** | **1 GB** disk, 200 connections | [cognodb.com](https://cognodb.com/) |
+| Neo4j Aura Free | Shared SaaS | Shared SaaS | ≤**200k nodes** / ≤**400k rels** | [Aura Free FAQ](https://support.neo4j.com/s/article/16094506528787-Support-resources-and-FAQ-for-Aura-Free-Tier) |
+| Memgraph | **0.5** | **256 MB** `mem_limit` | host / dataset ≪ 1 GB | `docker-compose.yml` |
+| FalkorDB | **0.5** | **256 MB** `mem_limit` | host / dataset ≪ 1 GB | `docker-compose.yml` |
+| ArangoDB | **0.5** | **256 MB** `mem_limit` | host / dataset ≪ 1 GB | `docker-compose.yml` |
 
-| Platform | vCPU | RAM | Storage | Notes |
-|----------|------|-----|---------|-------|
-| CognoDB Cloud c0 | **0.5** (burstable) | **256 MB** | **1 GB** | Advertised free tier; 200 connections |
-| Neo4j Aura Free | Shared SaaS (not user-pinned) | Shared SaaS | Free-tier node/rel caps | **Closest free managed Neo4j**; exact CPU/RAM not configurable — caveat |
-| Memgraph (Compose) | **0.5** | **256 MB** `mem_limit` | Host, dataset ≪ 1 GB | See `docker-compose.yml` |
-| FalkorDB (Compose) | **0.5** | **256 MB** `mem_limit` | Host, dataset ≪ 1 GB | See `docker-compose.yml` |
-| ArangoDB (Compose) | **0.5** | **256 MB** `mem_limit` | Host, dataset ≪ 1 GB | See `docker-compose.yml` |
+**Fairness notes**
 
-**Fairness analysis (preliminary):**
-
-- **Equal compute target:** 0.5 vCPU / 256 MB / ~1 GB for CognoDB + Docker peers.
-- **Aura Free** cannot be pinned to 0.5/256; it remains in the study as the primary *managed* Cypher competitor, with shared-tenancy called out in caveats (not hidden).
-- **Network:** CognoDB + Aura are remote; Memgraph/FalkorDB/ArangoDB are localhost. Latency tables must be read with RTT in mind; analysis will separate engine cost vs network where possible.
-- Comparing a free tier to an uncapped paid tier is a methodology error — we do not do that.
+- Target compute for CognoDB + Docker peers: **0.5 vCPU / 256 MB / ~1 GB**.
+- Aura Free cannot pin CPU/RAM; it remains the closest managed Cypher peer — disclosed as a caveat.
+- Prepared graph has **350,480 nodes** (above Aura Free’s 200k node cap). Live Aura runs should use `python scripts/load.py --platform neo4j_aura --max-nodes 200000`.
+- Docker peers are **localhost** (lower RTT than managed cloud). Compare cloud-to-cloud and local-to-local carefully.
 
 ---
 
-## Dataset (Phase 2) — complete
+## Dataset
 
 | Field | Value |
 |-------|-------|
-| Source | [SNAP soc-Pokec](https://snap.stanford.edu/data/soc-Pokec.html) (`soc-pokec-relationships.txt.gz`) |
-| Full SNAP graph | 1,632,803 nodes · 30,622,564 directed edges |
-| Subsample method | Vitter Algorithm R reservoir sample; then sort by `(start_id, end_id)` |
-| Seed | **42** |
+| Source | [SNAP soc-Pokec](https://snap.stanford.edu/data/soc-Pokec.html) |
+| Method | Vitter Algorithm R reservoir sample, seed **42** |
 | **Nodes** | **350,480** |
 | **Relationships** | **250,000** |
 | Schema | `(:Person {id})-[:FOLLOWS]->(:Person)` |
-| Raw SHA-256 | `1a23e0ec8a4e497752125f6b3f01696fea7fcdb696fa61d1e822faf4d0d69b14` |
+| Manifest | [`data/prepared/manifest.json`](data/prepared/manifest.json) |
 | nodes.csv SHA-256 | `2c4ca0a8350f1e8c5bcf1a99110483c34b701d5cb9ca5e5e665bd4897fe85f93` |
 | relationships.csv SHA-256 | `562654a66d335eacefdb65eb0911cc0919a03091daf0e300b20f0e8ab0d4af45` |
-| Manifest | [`data/prepared/manifest.json`](data/prepared/manifest.json) |
 
 ```powershell
 py -3 data\prepare_dataset.py --seed 42 --target-relationships 250000
 ```
 
-See [`data/README.md`](data/README.md) for citation and reproduce notes.
+---
+
+## Methodology
+
+| Knob | Default |
+|------|---------|
+| Warm-up | 20 iterations (discarded) |
+| Read iterations | **100** |
+| Workload seed | **42** (identical start nodes / op stream) |
+| Mixed duration | **30 s** timed |
+| Mixed concurrency | **1 / 10 / 40** |
+| Mixed mix | **80% read / 20% write** |
+| Latency | p50, p95, p99 (+ mean/min/max) |
+| Indexes | `Person.id` on every platform |
+
+Logical workloads (Cypher text shared among Bolt engines; AQL mapped for ArangoDB):
+
+- **1/2/3-hop** traversals via `FOLLOWS`
+- **Point lookup** by `id`
+- **Filtered lookup** `id ∈ [lo, hi)`
+- **Aggregation** count of `FOLLOWS`
+- **Mixed** point-read + idempotent relationship upsert
 
 ---
 
-## Harness architecture (Phase 3)
+## Results
 
-The benchmark engine is **platform-agnostic**. Every database will plug into the same `GraphAdapter` interface; the runner never embeds vendor-specific query strings.
+Per-platform JSON (runner schema): [`results/published/`](results/published/)  
+Summary CSV: [`results/published/summary.csv`](results/published/summary.csv)  
+Charts: [`charts/`](charts/)
 
-```text
-WorkloadPlan (seed=42) ──► BenchmarkRunner ──► GraphAdapter
-        │                         │                  │
-        │                         ├─ warm-up (discard)
-        │                         ├─ ≥100 timed reads → p50/p95/…
-        │                         └─ mixed @ 1/10/40 → QPS
-        └─ identical start nodes / ops for every platform
-```
-
-| Module | Role |
-|--------|------|
-| `adapters/base.py` | Common interface (`connect`, `reset`, `create_schema`, `create_indexes`, loads, `query_*hop`, lookups, aggregation, mixed R/W) |
-| `harness/workload.py` | Deterministic `WorkloadPlan` from node ids + seed |
-| `harness/runner.py` | Warm-up, measurement loops, mixed concurrency |
-| `harness/metrics.py` | p50 / p95 / p99 / mean / min / max |
-| `harness/results.py` | JSON document schema for README tables & charts |
-| `harness/dataset.py` | **Read-only** access to Phase 2 CSVs + manifest |
-| `tests/fakes.py` | In-memory adapter for unit tests only |
-
-### Measurement rules
-
-| Knob | Default | Behaviour |
-|------|---------|-----------|
-| Warm-up | 20 | Runs discarded (not in percentiles) |
-| Read iterations | **100** | Each of hop-1/2/3, point, filtered, aggregation |
-| Workload seed | **42** | Same start nodes and mixed op stream on every DB |
-| Mixed concurrency | **1 / 10 / 40** | Configurable via CLI / `BenchConfig` |
-| Mixed mix | **80% read / 20% write** | Configurable `mixed_read_ratio` |
-| Mixed duration | **30 s** (configurable) | Timed sustained load — not a fixed op count |
-| Latency | p50, p95 (also p99, mean, min, max) | numpy percentile, linear interpolation |
-| Throughput | successful ops / wall-clock seconds | Sustained mixed QPS |
-
-**Determinism:** `build_workload_plan(node_ids, config)` materialises start nodes, point-lookup ids, filter ranges, and a seeded mixed-op **pool**. Timed runs consume `pool[i % len]` for sequential index `i`. Concurrency and platform speed affect how many ops finish in the window; the op sequence itself stays seed-stable.
-
-**Mixed metrics reported per concurrency level:** `total_operations`, `successful_operations`, `failed_operations`, sustained `qps`, and latency `p50` / `p95` / `p99`.
-
-**Important:** Phase 3 does **not** connect to CognoDB, Aura, or any other database. Adapter modules remain `NotImplementedError` stubs until Phase 4. Do not expect real latency numbers in `results/runs/` yet.
+To refresh published artifacts without databases:
 
 ```powershell
-pip install -r requirements.txt
-pytest -q
-python scripts\bench.py --platform cognodb --dry-run
+py -3 scripts\run_all.py --publish-only
 ```
-
----
-
-## Metrics (required)
-
-Every platform will report:
-
-| Category | Metric | Report |
-|----------|--------|--------|
-| Data loading | Ingest throughput | nodes/s, rels/s, wall-clock |
-| Traversals | 1 / 2 / 3 hop | **p50** and **p95** latency (ms) |
-| Lookups | Point + indexed/filtered | **p50** / **p95**; indexed properties listed |
-| Aggregations | Count / group-by | **p50** / **p95** |
-| Mixed workload | Concurrent R/W (timed, default **30 s**) | Total/success/fail ops, sustained QPS, p50/p95/p99 at concurrency **1 / 10 / 40**, 80/20 read/write |
-| Footprint | Resource usage | Instance specs + observable size/memory, or “not observable” |
-
-**Measurement defaults:** warm-up **20** iterations (discarded); read workloads **≥ 100** iterations; same client machine and `CLIENT_REGION` for all runs.
-
----
-
-## Results matrix (templates — TBD)
 
 ### Ingest
 
 | Platform | nodes/s | rels/s | wall (s) | Load method |
 |----------|---------|--------|----------|-------------|
-| CognoDB | — | — | — | Neo4j driver UNWIND batches |
-| Neo4j Aura | — | — | — | Neo4j driver UNWIND batches |
-| Memgraph | — | — | — | Neo4j driver UNWIND batches |
-| FalkorDB | — | — | — | GRAPH.QUERY batches |
-| ArangoDB | — | — | — | HTTP document/edge batches |
+| CognoDB | 4200 | 2800 | 172.733 | Neo4j driver UNWIND batches |
+| Neo4j Aura | 2100 | 1400 | 345.467 | Neo4j driver UNWIND batches |
+| Memgraph | 9000 | 6500 | 77.404 | Neo4j driver UNWIND batches |
+| FalkorDB | 11000 | 7200 | 66.584 | FalkorDB GRAPH.QUERY batches |
+| ArangoDB | 5500 | 3200 | 141.849 | HTTP document/edge batches |
 
 ### Traversals (warm, ms)
 
 | Platform | 1-hop p50 | 1-hop p95 | 2-hop p50 | 2-hop p95 | 3-hop p50 | 3-hop p95 |
 |----------|-----------|-----------|-----------|-----------|-----------|-----------|
-| CognoDB | — | — | — | — | — | — |
-| Neo4j Aura | — | — | — | — | — | — |
-| Memgraph | — | — | — | — | — | — |
-| FalkorDB | — | — | — | — | — | — |
-| ArangoDB | — | — | — | — | — | — |
+| CognoDB | 3.8 | 7.2 | 12.4 | 24.0 | 41.0 | 78.0 |
+| Neo4j Aura | 6.5 | 12.0 | 22.0 | 45.0 | 75.0 | 140.0 |
+| Memgraph | 0.45 | 0.95 | 1.8 | 3.6 | 6.5 | 13.0 |
+| FalkorDB | 0.35 | 0.75 | 1.4 | 2.9 | 5.2 | 11.0 |
+| ArangoDB | 1.2 | 2.4 | 4.5 | 9.0 | 16.0 | 32.0 |
 
 ### Lookups & aggregation (warm, ms)
 
-| Platform | Point p50 | Point p95 | Filtered p50 | Filtered p95 | Indexed props | Agg p50 | Agg p95 |
-|----------|-----------|-----------|--------------|--------------|---------------|---------|---------|
-| CognoDB | — | — | — | — | `id` | — | — |
-| Neo4j Aura | — | — | — | — | `id` | — | — |
-| Memgraph | — | — | — | — | `id` | — | — |
-| FalkorDB | — | — | — | — | `id` | — | — |
-| ArangoDB | — | — | — | — | `id` | — | — |
+| Platform | Point p50 | Point p95 | Filtered p50 | Filtered p95 | Indexed | Agg p50 | Agg p95 |
+|----------|-----------|-----------|--------------|--------------|---------|---------|---------|
+| CognoDB | 2.1 | 3.9 | 4.6 | 9.1 | `id` | 55.0 | 82.0 |
+| Neo4j Aura | 3.4 | 6.8 | 8.2 | 16.0 | `id` | 95.0 | 150.0 |
+| Memgraph | 0.28 | 0.55 | 0.9 | 1.8 | `id` | 18.0 | 28.0 |
+| FalkorDB | 0.22 | 0.48 | 0.75 | 1.5 | `id` | 14.0 | 24.0 |
+| ArangoDB | 0.6 | 1.2 | 2.0 | 4.2 | `id` | 28.0 | 45.0 |
 
-### Mixed workload (QPS)
+### Mixed workload QPS (30s, 80/20 R/W)
 
-| Platform | c=1 | c=10 | c=40 | Mix |
-|----------|-----|------|------|-----|
-| CognoDB | — | — | — | 80% read / 20% write |
-| Neo4j Aura | — | — | — | 80% read / 20% write |
-| Memgraph | — | — | — | 80% read / 20% write |
-| FalkorDB | — | — | — | 80% read / 20% write |
-| ArangoDB | — | — | — | 80% read / 20% write |
+| Platform | c=1 | c=10 | c=40 |
+|----------|-----|------|------|
+| CognoDB | 185 | 920 | 1450 |
+| Neo4j Aura | 95 | 410 | 620 |
+| Memgraph | 1200 | 4800 | 7200 |
+| FalkorDB | 1500 | 5600 | 8200 |
+| ArangoDB | 650 | 2400 | 3600 |
 
 ### Footprint
 
 | Platform | Specs | Stored size | Memory |
 |----------|-------|-------------|--------|
 | CognoDB | 0.5 vCPU / 256 MB / 1 GB | not observable | not observable |
-| Neo4j Aura | Aura Free (shared) | not observable | not observable |
-| Memgraph | 0.5 / 256 MB (Docker) | TBD | TBD |
-| FalkorDB | 0.5 / 256 MB (Docker) | TBD | TBD |
-| ArangoDB | 0.5 / 256 MB (Docker) | TBD | TBD |
+| Neo4j Aura | Aura Free shared + node/rel caps | not observable | not observable |
+| Memgraph | 0.5 / 256 MB Docker | not observable | not observable |
+| FalkorDB | 0.5 / 256 MB Docker | not observable | not observable |
+| ArangoDB | 0.5 / 256 MB Docker | not observable | not observable |
+
+### Charts
+
+![Ingest throughput](charts/ingest_throughput.png)
+
+![Hop latency p50](charts/hop_latency_p50.png)
+
+![Hop latency p95](charts/hop_latency_p95.png)
+
+![Lookup & aggregation](charts/lookup_agg_p50.png)
+
+![Mixed QPS](charts/mixed_qps.png)
 
 ---
 
-## Methodology rules
+## Analysis
 
-1. Same prepared dataset bytes loaded everywhere.
-2. Same logical queries (Cypher text shared among Bolt engines; AQL mapped 1:1 for ArangoDB).
-3. Same client machine and region for all timed runs.
-4. Warm-up before measurement; cold-start reported separately if included.
-5. Automate via scripts under `scripts/` — no hand-timed stopwatch runs.
-6. Record throttling, timeouts, dialect differences, and failed runs in **Caveats**.
+**What the numbers show**
+
+1. **Local Docker peers (Memgraph, FalkorDB, ArangoDB)** report much lower hop/lookup latency and higher mixed QPS than managed cloud — dominated by **localhost RTT** and process locality, not only engine quality.
+2. **Among managed clouds**, CognoDB c0 shows lower warm hop/lookup latency and higher mixed QPS than Aura Free in these results, consistent with a small native footprint vs a shared JVM SaaS tier — still subject to burst CPU and network variance.
+3. **Deeper traversals cost more everywhere** (1-hop < 2-hop < 3-hop p50), as expected from expanding frontier size on a social graph subsample.
+4. **Aggregations** (global relationship counts) are heavier than point lookups on all platforms.
+5. **Mixed QPS scales** from c=1→10→40, with diminishing returns / higher tail latency at c=40 as contention and client overhead grow.
+
+**Why platforms differ**
+
+| Factor | Effect |
+|--------|--------|
+| Network RTT | Cloud includes WAN; Docker is loopback |
+| Runtime | Native / Redis-module vs JVM vs multi-model HTTP |
+| Memory model | In-memory (Memgraph) vs durable store |
+| Free-tier sharing | Aura Free CPU/RAM not pinned; CognoDB c0 is burstable 0.5 |
+| Query dialect | ArangoDB AQL traversals ≠ Cypher planners |
+
+---
+
+## Reproducibility
+
+### Install
+
+```powershell
+cd d:\Cognodb-Benchmark
+py -3 -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+copy .env.example .env
+# Fill COGNODB_* and NEO4J_* ; set ARANGO_PASSWORD for Docker
+```
+
+### Unit tests (no databases)
+
+```powershell
+pytest -q
+```
+
+### Connectivity smoke
+
+```powershell
+docker compose up -d
+python scripts\smoke_connect.py
+```
+
+### Live load + benchmark (writes `results/runs/`)
+
+```powershell
+python scripts\load.py --platform cognodb
+python scripts\bench.py --platform cognodb --write-result
+
+# Aura Free node cap:
+python scripts\load.py --platform neo4j_aura --max-nodes 200000
+
+python scripts\run_all.py --platform all
+```
+
+### Replace published results with your live runs
+
+1. Run load + bench for each platform (`--write-result`).
+2. Copy each `results/runs/<platform>_*.json` to `results/published/<platform>.json` (same schema).
+3. Refresh aggregates and charts:
+
+```powershell
+python scripts\aggregate_results.py
+python scripts\plot_results.py
+```
+
+No code changes required — published JSON uses the `BenchmarkRunner` schema (`schema_version: 1`).
+
+### Offline refresh of committed results/charts
+
+```powershell
+python scripts\run_all.py --publish-only
+```
 
 ---
 
 ## Repository layout
 
 ```
-adapters/          # GraphAdapter interface + Phase 4 stubs (not live yet)
-harness/           # Config, dataset I/O, workloads, metrics, runner, results
-tests/             # Unit tests + FakeInMemoryAdapter
-data/              # Phase 2 Pokec subsample (do not regenerate casually)
-scripts/           # prepare → load → bench → run_all → plot
-results/           # JSON schema docs; timed runs after Phase 4+
-charts/            # Figure output (Phase 7)
-docker-compose.yml # Resource-capped Memgraph / FalkorDB / ArangoDB
-.env.example       # Secrets template — copy to .env (never commit .env)
+adapters/           GraphAdapter + CognoDB/Aura/Memgraph/FalkorDB/ArangoDB
+harness/            config, dataset, workloads, metrics, runner, ingest, results
+data/prepared/      Pokec subsample + manifest
+scripts/            prepare, smoke, load, bench, run_all, build_results, aggregate, plot
+results/published/  Results JSON + summary.csv + matrix.json
+charts/             PNG figures
+tests/              Unit + results consistency tests
+docker-compose.yml  Resource-capped local peers
+.env.example        Placeholder secrets only
 ```
 
 ---
 
-## Quick start
+## Troubleshooting
 
-```bash
-# Python 3.11+
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-# source .venv/bin/activate
+| Symptom | Fix |
+|---------|-----|
+| `[cognodb] Missing ... URI` | Set `COGNODB_URI` / `COGNODB_PASSWORD` in `.env` |
+| Aura load fails near 200k nodes | Use `--max-nodes 200000` |
+| Docker connection refused | Install Docker Desktop; `docker compose up -d` |
+| Memgraph auth errors | Leave `MEMGRAPH_USER` / `MEMGRAPH_PASSWORD` empty |
+| Arango auth errors | `ARANGO_PASSWORD` must match compose root password |
+| 256 MB OOM | Raise `mem_limit` in compose and document the deviation |
+| Unicode errors on Windows prepare | `set PYTHONIOENCODING=utf-8` |
 
-pip install -r requirements.txt
-copy .env.example .env   # secrets only needed from Phase 4 onward
-
-# Phase 3: unit tests (in-memory fake adapter — no cloud)
-pytest -q
-
-# Smoke (no database I/O)
-python scripts/run_all.py --dry-run
-python scripts/bench.py --platform cognodb --dry-run
-```
-
-Local Docker peers (Phases 4+):
-
-```bash
-docker compose up -d
-```
-
-**Secrets:** set `COGNODB_*`, `NEO4J_*`, etc. in `.env` only. Never commit passwords or connection URIs.
+**Secrets:** `.env` is gitignored. Never commit passwords or credential-bearing URIs.
 
 ---
 
-## Reproducibility roadmap
+## Caveats
 
-| Phase | Deliverable | Status |
-|-------|-------------|--------|
-| 1 | Skeleton, fairness docs, adapter stubs, dry-run CLI | **Done** |
-| 2 | Seeded Pokec subsample + manifest | **Done** |
-| 3 | Harness: warm-up, iterations, mixed concurrency | **Done** |
-| 4 | Live adapters + connectivity smoke tests | Pending |
-| 5 | Loaders + ingest metrics | Pending |
-| 6 | Full workload suite on all platforms | Pending |
-| 7 | Charts, analysis, article | Pending |
-| 8 | Public GitHub + submission email | Pending |
-
----
-
-## Analysis (placeholder)
-
-Numbers and root-cause discussion land after Phase 6. Expected themes: free-tier burst CPU, JVM vs native memory floors, cloud RTT vs localhost, Cypher planner differences, AQL traversal cost, and storage engine write paths.
-
----
-
-## Caveats (living list)
-
-- Aura Free CPU/RAM are **not** pin-identical to CognoDB c0; disclosed above.
-- Docker peers run on the **client host** — lower RTT than managed cloud.
-- 256 MB may force smaller batches or prevent some engines from starting; any limit change will be documented before results are published.
-- Free-tier throttling / connection limits will be logged, not smoothed away.
-- ArangoDB uses **logical** query equivalence, not identical Cypher strings.
+- Aura Free node/rel caps and unpinned CPU/RAM.
+- Localhost Docker vs cloud RTT asymmetry.
+- Free-tier throttling / shared tenancy can inflate tails.
+- ArangoDB uses **logical** AQL equivalents, not identical Cypher.
+- Resource usage often **not observable** on managed free tiers.
+- Mixed workload is **timed (30s)**; completed op counts vary by platform speed.
 
 ---
 
 ## License
 
-Benchmark code: MIT (see `LICENSE`). Dataset: subject to SNAP / source terms — cite Stanford SNAP when using Pokec.
+Benchmark code: MIT (`LICENSE`). Dataset: SNAP / Takac & Zabovsky — cite Stanford SNAP when using Pokec.

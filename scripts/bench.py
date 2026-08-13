@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Run workloads for one platform via the Phase 3 harness.
+"""Run workloads for one platform via the benchmark harness.
 
-Real adapters are Phase 4. Use --dry-run for stub metadata, or tests/fakes
-for local harness validation.
+Requires a reachable database (credentials in .env). Use --dry-run for metadata only.
 """
 
 from __future__ import annotations
@@ -24,6 +23,7 @@ from harness.config import (  # noqa: E402
     PLATFORMS,
     BenchConfig,
 )
+from adapters.errors import AdapterConnectionError  # noqa: E402
 from harness.results import default_result_path, write_result_json  # noqa: E402
 from harness.runner import BenchmarkRunner  # noqa: E402
 
@@ -61,11 +61,7 @@ def main() -> None:
         payload = {
             "platform": adapter.name,
             "status": "dry_run",
-            "phase": 3,
-            "note": (
-                "Phase 3 harness is ready. Platform adapters are Phase 4; "
-                "no database connection attempted."
-            ),
+            "note": "Dry-run only — no database connection attempted.",
             "indexed_properties": adapter.indexed_properties(),
             "load_method": adapter.load_method(),
             "footprint": adapter.footprint(),
@@ -91,15 +87,26 @@ def main() -> None:
     )
     try:
         doc = BenchmarkRunner(adapter, cfg).run(connect=True)
+    except AdapterConnectionError as exc:
+        print(
+            json.dumps(
+                {
+                    "platform": adapter.name,
+                    "status": "connection_error",
+                    "error": str(exc),
+                    "note": "Set .env credentials and ensure the instance is reachable.",
+                },
+                indent=2,
+            )
+        )
+        sys.exit(1)
     except NotImplementedError as exc:
         print(
             json.dumps(
                 {
                     "platform": adapter.name,
-                    "status": "adapter_not_implemented",
-                    "phase": 3,
+                    "status": "not_implemented",
                     "error": str(exc),
-                    "note": "Implement Phase 4 adapters before timed runs.",
                 },
                 indent=2,
             )

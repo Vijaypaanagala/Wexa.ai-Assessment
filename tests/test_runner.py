@@ -93,14 +93,14 @@ def test_mixed_concurrency_default_levels() -> None:
         assert "qps" in level
 
 
-def test_adapter_stubs_are_not_callable_for_queries() -> None:
-    """Phase 3 must not ship working cloud adapters."""
+def test_live_adapter_requires_connection_before_query() -> None:
     from adapters.cognodb import CognoDBAdapter
+    from adapters.errors import AdapterConnectionError
 
     ad = CognoDBAdapter()
     try:
-        ad.connect()
+        ad.query_1hop(1)
         raised = False
-    except NotImplementedError:
+    except AdapterConnectionError:
         raised = True
     assert raised

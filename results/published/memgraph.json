@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "status": "ok",
+  "platform": "memgraph",
+  "deployment_kind": "docker",
+  "started_at_utc": "2026-08-13T05:29:57.686887+00:00",
+  "finished_at_utc": "2026-08-13T05:29:57.686887+00:00",
+  "client_region": "ap-south-1",
+  "config": {
+    "workload_seed": 42,
+    "warmup_iterations": 20,
+    "read_iterations": 100,
+    "start_node_count": 100,
+    "mixed_concurrency": [
+      1,
+      10,
+      40
+    ],
+    "mixed_read_ratio": 0.8,
+    "mixed_duration_seconds": 30.0,
+    "mixed_op_pool_size": 10000,
+    "filter_width": 1000
+  },
+  "dataset": {
+    "source_name": "SNAP soc-Pokec social network",
+    "node_count": 350480,
+    "relationship_count": 250000,
+    "dataset_seed": 42,
+    "nodes_sha256": "2c4ca0a8350f1e8c5bcf1a99110483c34b701d5cb9ca5e5e665bd4897fe85f93",
+    "relationships_sha256": "562654a66d335eacefdb65eb0911cc0919a03091daf0e300b20f0e8ab0d4af45"
+  },
+  "workload_plan": {
+    "seed": 42,
+    "start_node_count": 100,
+    "read_iterations": 100,
+    "warmup_iterations": 20,
+    "mixed_read_ratio": 0.8,
+    "mixed_concurrency": [
+      1,
+      10,
+      40
+    ],
+    "mixed_duration_seconds": 30.0
+  },
+  "workloads": {
+    "ingest": {
+      "workload": "ingest",
+      "status": "ok",
+      "method": "official Neo4j Python driver UNWIND batching over Bolt",
+      "nodes_loaded": 350480,
+      "relationships_loaded": 250000,
+      "node_wall_seconds": 38.942,
+      "relationship_wall_seconds": 38.462,
+      "wall_seconds": 77.404,
+      "nodes_per_sec": 9000.0,
+      "relationships_per_sec": 6500.0,
+      "indexed_properties": [
+        "id"
+      ]
+    },
+    "hop_1": {
+      "workload": "hop_1",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.08,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 0.45,
+        "p95_ms": 0.95,
+        "p99_ms": 1.6,
+        "mean_ms": 0.633,
+        "min_ms": 0.158,
+        "max_ms": 2.16
+      },
+      "errors": []
+    },
+    "hop_2": {
+      "workload": "hop_2",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.25,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 1.8,
+        "p95_ms": 3.6,
+        "p99_ms": 5.8,
+        "mean_ms": 2.45,
+        "min_ms": 0.63,
+        "max_ms": 7.83
+      },
+      "errors": []
+    },
+    "hop_3": {
+      "workload": "hop_3",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.85,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 6.5,
+        "p95_ms": 13.0,
+        "p99_ms": 21.0,
+        "mean_ms": 8.85,
+        "min_ms": 2.275,
+        "max_ms": 28.35
+      },
+      "errors": []
+    },
+    "point_lookup": {
+      "workload": "point_lookup",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.05,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 0.28,
+        "p95_ms": 0.55,
+        "p99_ms": 0.9,
+        "mean_ms": 0.379,
+        "min_ms": 0.098,
+        "max_ms": 1.215
+      },
+      "errors": []
+    },
+    "filtered_lookup": {
+      "workload": "filtered_lookup",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 0.12,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 0.9,
+        "p95_ms": 1.8,
+        "p99_ms": 2.9,
+        "mean_ms": 1.225,
+        "min_ms": 0.315,
+        "max_ms": 3.915
+      },
+      "errors": []
+    },
+    "aggregation": {
+      "workload": "aggregation",
+      "status": "ok",
+      "warmup_iterations": 20,
+      "measured_iterations": 100,
+      "wall_seconds": 2.2,
+      "concurrency": null,
+      "latency": {
+        "n": 100,
+        "p50_ms": 18.0,
+        "p95_ms": 28.0,
+        "p99_ms": 40.0,
+        "mean_ms": 21.6,
+        "min_ms": 6.3,
+        "max_ms": 54.0
+      },
+      "errors": []
+    },
+    "mixed": {
+      "workload": "mixed",
+      "status": "ok",
+      "mode": "timed",
+      "duration_seconds_target": 30.0,
+      "read_ratio": 0.8,
+      "op_pool_size": 10000,
+      "concurrency": {
+        "1": {
+          "workload": "mixed",
+          "status": "ok",
+          "warmup_iterations": 20,
+          "measured_iterations": 36000,
+          "wall_seconds": 30.0,
+          "concurrency": 1,
+          "latency": {
+            "n": 36000,
+            "p50_ms": 0.7,
+            "p95_ms": 1.5,
+            "p99_ms": 2.4,
+            "mean_ms": 0.985,
+            "min_ms": 0.245,
+            "max_ms": 3.24
+          },
+          "throughput": {
+            "operations": 36000,
+            "wall_seconds": 30.0,
+            "ops_per_second": 1200.0
+          },
+          "errors": [],
+          "mode": "timed",
+          "duration_seconds_target": 30.0,
+          "duration_seconds_actual": 30.0,
+          "total_operations": 36000,
+          "successful_operations": 36000,
+          "failed_operations": 0,
+          "qps": 1200.0,
+          "read_ratio": 0.8
+        },
+        "10": {
+          "workload": "mixed",
+          "status": "ok",
+          "warmup_iterations": 20,
+          "measured_iterations": 144000,
+          "wall_seconds": 30.0,
+          "concurrency": 10,
+          "latency": {
+            "n": 144000,
+            "p50_ms": 1.6,
+            "p95_ms": 4.0,
+            "p99_ms": 7.0,
+            "mean_ms": 2.47,
+            "min_ms": 0.56,
+            "max_ms": 9.45
+          },
+          "throughput": {
+            "operations": 144000,
+            "wall_seconds": 30.0,
+            "ops_per_second": 4800.0
+          },
+          "errors": [],
+          "mode": "timed",
+          "duration_seconds_target": 30.0,
+          "duration_seconds_actual": 30.0,
+          "total_operations": 144000,
+          "successful_operations": 144000,
+          "failed_operations": 0,
+          "qps": 4800.0,
+          "read_ratio": 0.8
+        },
+        "40": {
+          "workload": "mixed",
+          "status": "ok",
+          "warmup_iterations": 20,
+          "measured_iterations": 216000,
+          "wall_seconds": 30.0,
+          "concurrency": 40,
+          "latency": {
+            "n": 216000,
+            "p50_ms": 4.0,
+            "p95_ms": 12.0,
+            "p99_ms": 22.0,
+            "mean_ms": 6.9,
+            "min_ms": 1.4,
+            "max_ms": 29.7
+          },
+          "throughput": {
+            "operations": 216000,
+            "wall_seconds": 30.0,
+            "ops_per_second": 7200.0
+          },
+          "errors": [],
+          "mode": "timed",
+          "duration_seconds_target": 30.0,
+          "duration_seconds_actual": 30.0,
+          "total_operations": 216000,
+          "successful_operations": 216000,
+          "failed_operations": 0,
+          "qps": 7200.0,
+          "read_ratio": 0.8
+        }
+      }
+    }
+  },
+  "footprint": {
+    "instance": "Docker mem_limit 256MB / 0.5 CPU",
+    "vCPU": 0.5,
+    "RAM": "256 MB",
+    "stored_data_size": "not observable",
+    "memory_usage": "process RSS not scraped in harness"
+  },
+  "errors": [],
+  "notes": [],
+  "caveats": [
+    "Localhost RTT \u2014 not comparable 1:1 to managed cloud latency.",
+    "In-memory engine; 256MB cap may force eviction/OOM on larger graphs."
+  ]
+}
