@@ -1,4 +1,4 @@
-"""CognoDB Cloud — Neo4j Bolt/Cypher compatible (official neo4j driver)."""
+"""CognoDB Cloud stub — Phase 4 will implement Bolt/Cypher via neo4j driver."""
 
 from __future__ import annotations
 
@@ -16,20 +16,18 @@ class CognoDBAdapter(GraphAdapter):
         self._driver = None
 
     def connect(self) -> None:
-        raise NotImplementedError("Phase 4: connect via neo4j.GraphDatabase.driver(bolt+s://...)")
+        raise NotImplementedError("Phase 4: CognoDB Bolt adapter")
 
     def close(self) -> None:
-        if self._driver is not None:
-            self._driver.close()
-            self._driver = None
-
-    def ping(self) -> bool:
-        raise NotImplementedError
+        self._driver = None
 
     def reset(self) -> None:
         raise NotImplementedError
 
     def create_schema(self) -> None:
+        raise NotImplementedError
+
+    def create_indexes(self) -> None:
         raise NotImplementedError
 
     def load_nodes(self, rows: Sequence[dict[str, Any]]) -> int:
@@ -38,7 +36,13 @@ class CognoDBAdapter(GraphAdapter):
     def load_relationships(self, rows: Sequence[dict[str, Any]]) -> int:
         raise NotImplementedError
 
-    def hop(self, start_id: int, depth: int) -> int:
+    def query_1hop(self, start_id: int) -> int:
+        raise NotImplementedError
+
+    def query_2hop(self, start_id: int) -> int:
+        raise NotImplementedError
+
+    def query_3hop(self, start_id: int) -> int:
         raise NotImplementedError
 
     def point_lookup(self, node_id: int) -> Any:

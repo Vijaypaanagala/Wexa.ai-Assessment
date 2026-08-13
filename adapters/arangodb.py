@@ -1,4 +1,4 @@
-"""ArangoDB — AQL mapped to the same logical workloads; Docker-capped."""
+"""ArangoDB stub — Phase 4 (AQL logical equivalents)."""
 
 from __future__ import annotations
 
@@ -16,18 +16,18 @@ class ArangoDBAdapter(GraphAdapter):
         self._db = None
 
     def connect(self) -> None:
-        raise NotImplementedError("Phase 4: HTTP/AQL client via httpx or python-arango")
+        raise NotImplementedError("Phase 4: ArangoDB adapter")
 
     def close(self) -> None:
         self._db = None
-
-    def ping(self) -> bool:
-        raise NotImplementedError
 
     def reset(self) -> None:
         raise NotImplementedError
 
     def create_schema(self) -> None:
+        raise NotImplementedError
+
+    def create_indexes(self) -> None:
         raise NotImplementedError
 
     def load_nodes(self, rows: Sequence[dict[str, Any]]) -> int:
@@ -36,7 +36,13 @@ class ArangoDBAdapter(GraphAdapter):
     def load_relationships(self, rows: Sequence[dict[str, Any]]) -> int:
         raise NotImplementedError
 
-    def hop(self, start_id: int, depth: int) -> int:
+    def query_1hop(self, start_id: int) -> int:
+        raise NotImplementedError
+
+    def query_2hop(self, start_id: int) -> int:
+        raise NotImplementedError
+
+    def query_3hop(self, start_id: int) -> int:
         raise NotImplementedError
 
     def point_lookup(self, node_id: int) -> Any:
@@ -56,20 +62,12 @@ class ArangoDBAdapter(GraphAdapter):
 
     def footprint(self) -> dict[str, Any]:
         return {
-            "instance": "Docker (docker-compose.yml)",
+            "instance": "Docker (resource-capped)",
             "vCPU": 0.5,
-            "RAM": "256 MB (mem_limit)",
-            "disk": "host-limited; sized for <1 GB dataset",
-            "stored_data_size": "not observable (Phase 6)",
-            "memory_usage": "not observable (Phase 6)",
-            "fairness_note": (
-                "AQL logical equivalents of Cypher workloads; "
-                "localhost RTT vs cloud disclosed in methodology."
-            ),
+            "RAM": "256 MB",
+            "stored_data_size": "not observable",
+            "memory_usage": "not observable",
         }
-
-    def indexed_properties(self) -> list[str]:
-        return ["id"]
 
     def load_method(self) -> str:
         return "ArangoDB document/edge batch import over HTTP"

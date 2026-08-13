@@ -2,7 +2,7 @@
 
 Fair, reproducible comparison of **CognoDB Cloud** against peer graph databases on the **same dataset**, **same logical workloads**, and **equivalent resource limits**.
 
-> Status: **Phase 2 complete** — SNAP soc-Pokec subsample ready. Metrics tables remain templates until Phases 5–7.
+> Status: **Phase 3 complete** — platform-agnostic harness ready. **No timed database results yet** (those require Phase 4 adapters + Phase 5/6 runs). Result tables below remain empty templates.
 
 This repository is a take-home-style engineering benchmark: **methodology and honesty over declaring a winner**.
 
@@ -67,6 +67,56 @@ See [`data/README.md`](data/README.md) for citation and reproduce notes.
 
 ---
 
+## Harness architecture (Phase 3)
+
+The benchmark engine is **platform-agnostic**. Every database will plug into the same `GraphAdapter` interface; the runner never embeds vendor-specific query strings.
+
+```text
+WorkloadPlan (seed=42) ──► BenchmarkRunner ──► GraphAdapter
+        │                         │                  │
+        │                         ├─ warm-up (discard)
+        │                         ├─ ≥100 timed reads → p50/p95/…
+        │                         └─ mixed @ 1/10/40 → QPS
+        └─ identical start nodes / ops for every platform
+```
+
+| Module | Role |
+|--------|------|
+| `adapters/base.py` | Common interface (`connect`, `reset`, `create_schema`, `create_indexes`, loads, `query_*hop`, lookups, aggregation, mixed R/W) |
+| `harness/workload.py` | Deterministic `WorkloadPlan` from node ids + seed |
+| `harness/runner.py` | Warm-up, measurement loops, mixed concurrency |
+| `harness/metrics.py` | p50 / p95 / p99 / mean / min / max |
+| `harness/results.py` | JSON document schema for README tables & charts |
+| `harness/dataset.py` | **Read-only** access to Phase 2 CSVs + manifest |
+| `tests/fakes.py` | In-memory adapter for unit tests only |
+
+### Measurement rules
+
+| Knob | Default | Behaviour |
+|------|---------|-----------|
+| Warm-up | 20 | Runs discarded (not in percentiles) |
+| Read iterations | **100** | Each of hop-1/2/3, point, filtered, aggregation |
+| Workload seed | **42** | Same start nodes and mixed op stream on every DB |
+| Mixed concurrency | **1 / 10 / 40** | Configurable via CLI / `BenchConfig` |
+| Mixed mix | **80% read / 20% write** | Configurable `mixed_read_ratio` |
+| Mixed duration | **30 s** (configurable) | Timed sustained load — not a fixed op count |
+| Latency | p50, p95 (also p99, mean, min, max) | numpy percentile, linear interpolation |
+| Throughput | successful ops / wall-clock seconds | Sustained mixed QPS |
+
+**Determinism:** `build_workload_plan(node_ids, config)` materialises start nodes, point-lookup ids, filter ranges, and a seeded mixed-op **pool**. Timed runs consume `pool[i % len]` for sequential index `i`. Concurrency and platform speed affect how many ops finish in the window; the op sequence itself stays seed-stable.
+
+**Mixed metrics reported per concurrency level:** `total_operations`, `successful_operations`, `failed_operations`, sustained `qps`, and latency `p50` / `p95` / `p99`.
+
+**Important:** Phase 3 does **not** connect to CognoDB, Aura, or any other database. Adapter modules remain `NotImplementedError` stubs until Phase 4. Do not expect real latency numbers in `results/runs/` yet.
+
+```powershell
+pip install -r requirements.txt
+pytest -q
+python scripts\bench.py --platform cognodb --dry-run
+```
+
+---
+
 ## Metrics (required)
 
 Every platform will report:
@@ -77,7 +127,7 @@ Every platform will report:
 | Traversals | 1 / 2 / 3 hop | **p50** and **p95** latency (ms) |
 | Lookups | Point + indexed/filtered | **p50** / **p95**; indexed properties listed |
 | Aggregations | Count / group-by | **p50** / **p95** |
-| Mixed workload | Concurrent R/W | QPS at concurrency **1 / 10 / 40**, 80/20 read/write |
+| Mixed workload | Concurrent R/W (timed, default **30 s**) | Total/success/fail ops, sustained QPS, p50/p95/p99 at concurrency **1 / 10 / 40**, 80/20 read/write |
 | Footprint | Resource usage | Instance specs + observable size/memory, or “not observable” |
 
 **Measurement defaults:** warm-up **20** iterations (discarded); read workloads **≥ 100** iterations; same client machine and `CLIENT_REGION` for all runs.
@@ -152,11 +202,12 @@ Every platform will report:
 ## Repository layout
 
 ```
-adapters/          # One adapter per platform (shared GraphAdapter interface)
-harness/           # Config, metrics (p50/p95), workloads, runner
-data/              # Dataset prep + prepared subsample
+adapters/          # GraphAdapter interface + Phase 4 stubs (not live yet)
+harness/           # Config, dataset I/O, workloads, metrics, runner, results
+tests/             # Unit tests + FakeInMemoryAdapter
+data/              # Phase 2 Pokec subsample (do not regenerate casually)
 scripts/           # prepare → load → bench → run_all → plot
-results/           # JSON outputs (schema documented)
+results/           # JSON schema docs; timed runs after Phase 4+
 charts/            # Figure output (Phase 7)
 docker-compose.yml # Resource-capped Memgraph / FalkorDB / ArangoDB
 .env.example       # Secrets template — copy to .env (never commit .env)
@@ -164,7 +215,7 @@ docker-compose.yml # Resource-capped Memgraph / FalkorDB / ArangoDB
 
 ---
 
-## Quick start (Phase 1)
+## Quick start
 
 ```bash
 # Python 3.11+
@@ -175,9 +226,12 @@ python -m venv .venv
 # source .venv/bin/activate
 
 pip install -r requirements.txt
-copy .env.example .env   # then fill secrets when accounts exist
+copy .env.example .env   # secrets only needed from Phase 4 onward
 
-# Smoke test (no database I/O)
+# Phase 3: unit tests (in-memory fake adapter — no cloud)
+pytest -q
+
+# Smoke (no database I/O)
 python scripts/run_all.py --dry-run
 python scripts/bench.py --platform cognodb --dry-run
 ```
@@ -198,7 +252,7 @@ docker compose up -d
 |-------|-------------|--------|
 | 1 | Skeleton, fairness docs, adapter stubs, dry-run CLI | **Done** |
 | 2 | Seeded Pokec subsample + manifest | **Done** |
-| 3 | Harness: warm-up, iterations, mixed concurrency | Pending |
+| 3 | Harness: warm-up, iterations, mixed concurrency | **Done** |
 | 4 | Live adapters + connectivity smoke tests | Pending |
 | 5 | Loaders + ingest metrics | Pending |
 | 6 | Full workload suite on all platforms | Pending |

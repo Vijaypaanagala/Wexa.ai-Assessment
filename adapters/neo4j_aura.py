@@ -1,4 +1,4 @@
-"""Neo4j Aura Free — Cypher / Bolt (neo4j+s://)."""
+"""Neo4j Aura Free stub — Phase 4."""
 
 from __future__ import annotations
 
@@ -16,20 +16,18 @@ class Neo4jAuraAdapter(GraphAdapter):
         self._driver = None
 
     def connect(self) -> None:
-        raise NotImplementedError("Phase 4: connect via neo4j.GraphDatabase.driver(neo4j+s://...)")
+        raise NotImplementedError("Phase 4: Neo4j Aura adapter")
 
     def close(self) -> None:
-        if self._driver is not None:
-            self._driver.close()
-            self._driver = None
-
-    def ping(self) -> bool:
-        raise NotImplementedError
+        self._driver = None
 
     def reset(self) -> None:
         raise NotImplementedError
 
     def create_schema(self) -> None:
+        raise NotImplementedError
+
+    def create_indexes(self) -> None:
         raise NotImplementedError
 
     def load_nodes(self, rows: Sequence[dict[str, Any]]) -> int:
@@ -38,7 +36,13 @@ class Neo4jAuraAdapter(GraphAdapter):
     def load_relationships(self, rows: Sequence[dict[str, Any]]) -> int:
         raise NotImplementedError
 
-    def hop(self, start_id: int, depth: int) -> int:
+    def query_1hop(self, start_id: int) -> int:
+        raise NotImplementedError
+
+    def query_2hop(self, start_id: int) -> int:
+        raise NotImplementedError
+
+    def query_3hop(self, start_id: int) -> int:
         raise NotImplementedError
 
     def point_lookup(self, node_id: int) -> Any:
@@ -59,15 +63,10 @@ class Neo4jAuraAdapter(GraphAdapter):
     def footprint(self) -> dict[str, Any]:
         return {
             "instance": "AuraDB Free",
-            "vCPU": "shared (Aura Free; document console specs at run time)",
-            "RAM": "shared (Aura Free; document console specs at run time)",
-            "disk": "Aura Free limits (nodes/relationships caps apply)",
+            "vCPU": "shared",
+            "RAM": "shared",
             "stored_data_size": "not observable",
             "memory_usage": "not observable",
-            "fairness_note": (
-                "Aura Free is shared SaaS; closest free peer to CognoDB c0. "
-                "Exact vCPU/RAM not user-configurable — disclosed as a caveat."
-            ),
         }
 
     def load_method(self) -> str:
